@@ -1,4 +1,3 @@
-Attribute VB_Name = "mod_Utils"
 ' ===================================================
 ' MODULE: mod_Utils
 ' Fonctions utilitaires (tranche, code, listes)
