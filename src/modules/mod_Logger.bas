@@ -1,7 +1,6 @@
-Attribute VB_Name = "mod_Logger"
 ' ===================================================
 ' MODULE: mod_Logger
-' Système centralisé de gestion des erreurs et logs
+' SystÃ¨me centralisÃ© de gestion des erreurs et logs
 ' ===================================================
 
 Public Const LOG_INFO As String = "INFO"
@@ -21,7 +20,7 @@ Sub LogError(source As String, message As String, Optional errNumber As Long = 0
 End Sub
 
 Private Sub WriteLog(typeLog As String, source As String, message As String, errNumber As Long)
-    ' Vérifier si log actif
+    ' VÃ©rifier si log actif
     If UCase(GetConfig("LogActif")) = "NON" Then Exit Sub
     
     ' Filtrer par niveau
@@ -32,7 +31,7 @@ Private Sub WriteLog(typeLog As String, source As String, message As String, err
     If niveauMin = LOG_WARNING And typeLog = LOG_INFO Then Exit Sub
     If niveauMin = LOG_ERROR And (typeLog = LOG_INFO Or typeLog = LOG_WARNING) Then Exit Sub
     
-    ' Récupérer/créer feuille Logs
+    ' RÃ©cupÃ©rer/crÃ©er feuille Logs
     Dim ws As Worksheet
     On Error Resume Next
     Set ws = ThisWorkbook.Sheets("Logs")
@@ -45,7 +44,7 @@ Private Sub WriteLog(typeLog As String, source As String, message As String, err
     row = ws.Cells(ws.Rows.count, "A").End(xlUp).row + 1
     If row < 2 Then row = 2
     
-    ' Écrire le log
+    ' Ã‰crire le log
     ws.Cells(row, 1).Value = Format(Now, "dd/mm/yyyy hh:mm:ss")
     ws.Cells(row, 2).Value = typeLog
     ws.Cells(row, 3).Value = source
@@ -78,7 +77,7 @@ Private Sub CreerFeuilleLogs()
     ws.Cells(1, 2).Value = "Type"
     ws.Cells(1, 3).Value = "Source"
     ws.Cells(1, 4).Value = "Message"
-    ws.Cells(1, 5).Value = "N° Erreur"
+    ws.Cells(1, 5).Value = "NÂ° Erreur"
     
     ws.Rows(1).Font.Bold = True
     ws.Rows(1).Interior.Color = RGB(220, 220, 220)
@@ -112,7 +111,7 @@ Sub AfficherLogs()
     On Error GoTo 0
     
     If ws Is Nothing Then
-        MsgBox "Aucun log enregistré pour le moment.", vbInformation
+        MsgBox "Aucun log enregistrÃ© pour le moment.", vbInformation
         Exit Sub
     End If
     
@@ -135,17 +134,17 @@ Sub ViderLogs()
     lastRow = ws.Cells(ws.Rows.count, "A").End(xlUp).row
     If lastRow > 1 Then ws.Rows("2:" & lastRow).Delete
     
-    MsgBox "Logs vidés.", vbInformation
+    MsgBox "Logs vidÃ©s.", vbInformation
 End Sub
 
-' Cleanup global appelé en cas d'erreur fatale
+' Cleanup global appelÃ© en cas d'erreur fatale
 Sub RestaurerEtatExcel()
     Application.Calculation = xlCalculationAutomatic
     Application.EnableEvents = True
     Application.DisplayAlerts = True
     Application.ScreenUpdating = True
     
-    ' Fermer fichiers externes restés ouverts
+    ' Fermer fichiers externes restÃ©s ouverts
     On Error Resume Next
     Dim wbTemp As Workbook
     For Each wbTemp In Workbooks
