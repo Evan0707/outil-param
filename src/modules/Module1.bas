@@ -1,4 +1,3 @@
-Attribute VB_Name = "Module1"
 Sub CreerBoutonsPrincipal()
     Dim ws As Worksheet
     Set ws = ThisWorkbook.Sheets(1) ' Ou remplacez par le nom de votre feuille principale
@@ -38,6 +37,17 @@ Sub CreerBoutonsPrincipal()
         .OnAction = "ViderLogs"
         .Font.Size = 11
     End With
+    
+    ' ===== BOUTON STATISTIQUES =====
+    Dim btnStats As Button
+    Set btnStats = ws.Buttons.Add(50, 150, 200, 35)
+    With btnStats
+        .Caption = "Statistiques SAL"
+        .OnAction = "mod_Stats.ComptageEquipements"
+        .Font.Size = 11
+    End With
+    ws.Shapes(btnStats.Name).Fill.ForeColor.RGB = RGB(180, 230, 180)
+    ws.Shapes(btnStats.Name).TextFrame.Characters.Font.Color = RGB(0, 0, 0)
     
     MsgBox "Boutons crees !", vbInformation
 End Sub
