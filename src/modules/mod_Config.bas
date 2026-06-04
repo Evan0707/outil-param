@@ -1,7 +1,6 @@
-Attribute VB_Name = "mod_Config"
 ' ===================================================
 ' MODULE: mod_Config
-' Lecture centralisée des paramètres depuis la feuille Config
+' Lecture centralisÃ©e des paramÃ¨tres depuis la feuille Config
 ' ===================================================
 
 Function GetConfig(parametre As String) As String
