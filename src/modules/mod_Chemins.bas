@@ -1,8 +1,7 @@
-Attribute VB_Name = "mod_Chemins"
 ' ===================================================
 ' MODULE: mod_Chemins
-' GÈnÈration des chemins de fichiers selon la tranche
-' Chemins RELATIFS basÈs sur ThisWorkbook.Path
+' G√©n√©ration des chemins de fichiers selon la tranche
+' Chemins RELATIFS bas√©s sur ThisWorkbook.Path
 ' ===================================================
 
 ' Retourne le chemin absolu depuis un chemin relatif Config
@@ -10,7 +9,7 @@ Private Function ResoudreChemin(dossierConfig As String) As String
     Dim base As String
     base = ThisWorkbook.Path & "\"
     
-    ' Si le chemin dans Config est dÈj‡ absolu, on le retourne tel quel
+    ' Si le chemin dans Config est d√©j√† absolu, on le retourne tel quel
     If Left(dossierConfig, 1) = "\" Or Mid(dossierConfig, 2, 1) = ":" Then
         ResoudreChemin = dossierConfig
     Else
@@ -70,6 +69,18 @@ Function GetCheminFichierCAT(codeEqt As String) As String
         Case Else: GetCheminFichierCAT = ""
     End Select
 End Function
+
+Function GetCheminFichierSAL_ParTranche(tranche As String) As String
+    Dim dossier As String: dossier = ResoudreChemin(GetConfig("DossierRecherche"))
+    Select Case tranche
+        Case "0": GetCheminFichierSAL_ParTranche = dossier & GetConfig("FichierSAL_T0")
+        Case "1": GetCheminFichierSAL_ParTranche = dossier & GetConfig("FichierSAL_T1")
+        Case "2": GetCheminFichierSAL_ParTranche = dossier & GetConfig("FichierSAL_T2")
+        Case "9": GetCheminFichierSAL_ParTranche = dossier & GetConfig("FichierSAL_T9")
+        Case Else: GetCheminFichierSAL_ParTranche = ""
+    End Select
+End Function
+
 
 Function GetCheminReleve() As String
     GetCheminReleve = ResoudreChemin(GetConfig("DossierReleves")) & GetConfig("FichierReleve")
