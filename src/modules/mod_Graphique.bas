@@ -1,8 +1,7 @@
-Attribute VB_Name = "mod_Graphique"
 
 ' ===================================================
 ' MODULE: mod_Graphique
-' Génération du graphique PDM
+' GÃ©nÃ©ration du graphique PDM
 ' ===================================================
 
 Sub VoirGraphiqueDepuisBouton()
@@ -15,16 +14,16 @@ End Sub
 
 Sub VoirGraphiqueAvecLigne(ligneSelectionnee As Long)
     Dim ws As Worksheet
-    Set ws = ThisWorkbook.Sheets("Résultats")
+    Set ws = ThisWorkbook.Sheets("RÃ©sultats")
     On Error GoTo ErrorHandler
     
     Dim nomParam As String
     Dim codeEqt As String
     nomParam = ws.Cells(ligneSelectionnee, 1).Value
-    codeEqt = Replace(ws.Cells(1, 1).Value, "Équipement : ", "")
+    codeEqt = Replace(ws.Cells(1, 1).Value, "Ã‰quipement : ", "")
     
     If nomParam = "" Then
-        MsgBox "Aucun paramètre sur cette ligne"
+        MsgBox "Aucun paramÃ¨tre sur cette ligne"
         Exit Sub
     End If
     
@@ -32,7 +31,7 @@ Sub VoirGraphiqueAvecLigne(ligneSelectionnee As Long)
     cheminReleve = GetCheminReleve()
     
     If Dir(cheminReleve) = "" Then
-        MsgBox "Fichier relevés introuvable : " & cheminReleve
+        MsgBox "Fichier relevÃ©s introuvable : " & cheminReleve
         Exit Sub
     End If
     
@@ -80,7 +79,7 @@ Sub VoirGraphiqueAvecLigne(ligneSelectionnee As Long)
     Application.ScreenUpdating = True
     
     If count = 0 Then
-        MsgBox "Aucun relevé trouvé pour : " & nomParam
+        MsgBox "Aucun relevÃ© trouvÃ© pour : " & nomParam
         Exit Sub
     End If
     
@@ -115,14 +114,14 @@ Sub VoirGraphiqueAvecLigne(ligneSelectionnee As Long)
     wsGraph.Columns("A").NumberFormat = "dd/mm/yyyy"
     
     Dim chartObj As ChartObject
-    Set chartObj = wsGraph.ChartObjects.Add(Left:=10, Top:=count * 18 + 60, Width:=700, Height:=400)
+    Set chartObj = wsGraph.ChartObjects.Add(Left:=10, top:=count * 18 + 60, Width:=700, Height:=400)
     
     Dim ch As Chart
     Set ch = chartObj.Chart
     ch.ChartType = xlLine
     ch.SetSourceData source:=wsGraph.Range("A1:F" & count + 1)
     
-    ch.SeriesCollection(1).Name = "Valeur mesurée"
+    ch.SeriesCollection(1).Name = "Valeur mesurÃ©e"
     ch.SeriesCollection(1).Format.Line.ForeColor.RGB = RGB(0, 112, 192)
     ch.SeriesCollection(1).Format.Line.Weight = 2
     
@@ -150,7 +149,7 @@ Sub VoirGraphiqueAvecLigne(ligneSelectionnee As Long)
     
     wsGraph.Columns.AutoFit
     ThisWorkbook.Sheets("Graphique PDM").Activate
-    MsgBox "Graphique généré pour : " & nomParam & " (" & count & " relevés)"
+    MsgBox "Graphique gÃ©nÃ©rÃ© pour : " & nomParam & " (" & count & " relevÃ©s)"
     
     Exit Sub
 ErrorHandler:
