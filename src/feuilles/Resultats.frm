@@ -1,6 +1,5 @@
 Option Explicit
 
-Private WithEvents m_btnRecherche As MSForms.CommandButton
 Private m_loadSAL As Boolean
 Private m_load13E As Boolean
 Private m_loadCAT As Boolean
@@ -10,6 +9,7 @@ Private m_HTMLSAL As String
 Private m_HTML13E As String
 Private m_HTMLCAT As String
 Private m_HTMLSYGMA As String
+Private Const HDR_HEIGHT As Single = 40
 
 ' API Windows pour taille ecran reelle + DPI
 #If VBA7 Then
@@ -67,7 +67,7 @@ End Sub
 Public Sub InitAvecCode(codeEqt As String)
     On Error GoTo ErrorHandler
     m_CodeEqt = codeEqt
-    lblCode.Caption = " quipement : " & m_CodeEqt
+    lblCode.Caption = Chr(201) & "quipement : " & m_CodeEqt
     lblCode.Font.Bold = True
     lblCode.Font.Size = 14
     lblCode.TextAlign = fmTextAlignCenter
@@ -78,10 +78,19 @@ ErrorHandler:
 End Sub
 
 
+
 Private Sub UserForm_Initialize()
     On Error GoTo ErrorHandler
 
     Me.Caption = "R" & Chr(233) & "sultats " & Chr(233) & "quipement"
+    Me.BackColor = RGB(245, 245, 245)
+
+    Dim p As Integer
+    For p = 0 To mpOnglets.Pages.count - 1
+        mpOnglets.Pages(p).BackColor = RGB(255, 255, 255)
+    Next p
+    mpOnglets.BackColor = RGB(245, 245, 245)
+
     mpOnglets.Pages(0).Caption = "SAL"
     mpOnglets.Pages(1).Caption = "13E"
     mpOnglets.Pages(2).Caption = "CAT"
@@ -95,37 +104,35 @@ Private Sub UserForm_Initialize()
     Me.Width = w
     Me.Height = h
 
-    Call AjusterControles(w, h)
-
     m_loadSAL = True
     m_load13E = True
     m_loadCAT = True
     m_loadSYGMA = True
 
-    Set m_btnRecherche = Me.Controls.Add("Forms.CommandButton.1", "btnRecherche")
-    With m_btnRecherche
-        .Caption = "Nouvelle recherche"
-        .Width = 140
-        .Height = 26
-        .Left = Me.InsideWidth - (m_btnRecherche.Width + 10)
-        .top = m_btnRecherche.Height - 20
-        .Font.Size = 10
-    End With
 
     Exit Sub
 ErrorHandler:
     Call LogError("UserForm_Initialize", Err.Description, Err.Number)
 End Sub
 
+
+
 Private Sub AjusterControles(w As Single, h As Single)
-    mpOnglets.Width = w
-    mpOnglets.Height = h - 100
+    On Error Resume Next
+    mpOnglets.top = HDR_HEIGHT
+    mpOnglets.Left = 0
+    mpOnglets.Width = w - 4
+    mpOnglets.Height = h - HDR_HEIGHT - 4
     wbTableau.Width = mpOnglets.Width - 10
     wbTableau.Height = mpOnglets.Height - 25
-    If Not m_btnRecherche Is Nothing Then
-        m_btnRecherche.top = m_btnRecherche.Height - 20
-        m_btnRecherche.Left = Me.InsideWidth - (m_btnRecherche.Width + 10)
-    End If
+    lblCode.top = 8
+    lblCode.Left = 90
+    lblCode.Width = w - 200
+    lblCode.Height = 24
+    On Error GoTo 0
+    btnRecherche.top = 6
+    btnRecherche.Left = w - btnRecherche.Width - 14
+    btnRecherche.ZOrder 0
 End Sub
 
 Private Sub UserForm_Activate()
@@ -297,11 +304,21 @@ Private Function GenererHTMLSALAvecTooltip(resultsSAL As Variant, results13E As 
     js = js & "if(x+w>window.innerWidth)x=e.clientX-w-5;"
     js = js & "if(y+h>window.innerHeight)y=e.clientY-h-5;"
     js = js & "t.style.left=x+'px';t.style.top=y+'px';}"
+    js = js & "function filterTable(){"
+    js = js & "var q=document.getElementById('searchBox').value.toLowerCase();"
+    js = js & "var rows=document.getElementById('tbl').rows;var n=0;"
+    js = js & "for(var i=1;i<rows.length;i++){"
+    js = js & "var txt=(rows[i].innerText||rows[i].textContent).toLowerCase();"
+    js = js & "if(txt.indexOf(q)>-1){rows[i].style.display='';n++;}"
+    js = js & "else{rows[i].style.display='none';}}"
+    js = js & "var c=document.getElementById('cnt');if(c)c.innerHTML=n+' ligne(s) affich'+String.fromCharCode(233)+'e(s)';}"
     
     html = "<html><head>"
     html = html & "<style>" & css & "</style>"
     html = html & "<script>" & js & "</script>"
     html = html & "</head><body>"
+    ' Barre de filtre temps reel
+    html = html & "<input id='searchBox' onkeyup='filterTable()' placeholder='&#128269; Filtrer les param&egrave;tres...' style='width:320px;padding:6px;margin-bottom:8px;border:1px solid #1C6EA4;border-radius:4px;font-size:16px;'>"
     
     If IsEmpty(resultsSAL) Then
         html = html & "<p style='color:gray;font-style:italic'>Aucun param tre SAL trouv .</p>"
@@ -310,7 +327,7 @@ Private Function GenererHTMLSALAvecTooltip(resultsSAL As Variant, results13E As 
     End If
     
     ' Tableau SAL
-    html = html & "<table>"
+    html = html & "<table id='tbl'>"
     html = html & "<tr><th>Num s&eacute;q.</th><th>Param&egrave;tre</th><th>Val Normale</th><th>Unit&eacute; mesure</th><th>Seuil TB</th><th>Seuil B</th><th>Seuil H</th><th>Seuil TH</th><th>Val REF</th><th>Unit&eacute; REF</th><th>Commentaire 1</th><th>Commentaire 2</th><th>Commentaire 3</th></tr>"
     
     Dim tooltips As String
@@ -395,7 +412,7 @@ Private Function GenererHTMLSALAvecTooltip(resultsSAL As Variant, results13E As 
     Next i
     
     html = html & "</table>"
-    html = html & "<p style='color:gray;font-size:11px'>" & UBound(resultsSAL, 2) & " param tre(s)   survolez une ligne pour comparer</p>"
+    html = html & "<p id='cnt' style='color:gray;font-size:11px'>" & UBound(resultsSAL, 2) & " param tre(s)   survolez une ligne pour comparer</p>"
     
     ' Ajouter TOUS les tooltips   la fin du body (hors table)
     html = html & tooltips
@@ -416,12 +433,22 @@ Private Function GenererHTMLTableau(resultats As Variant, source As String, coul
     css = css & "tr:nth-child(even){background-color:" & couleurPair & ";}"
     css = css & "tr:hover{background-color:" & couleurHover & ";}"
     
-    html = "<html><head><style>" & css & "</style></head><body>"
+    Dim js As String
+    js = "function filterTable(){"
+    js = js & "var q=document.getElementById('searchBox').value.toLowerCase();"
+    js = js & "var rows=document.getElementById('tbl').rows;var n=0;"
+    js = js & "for(var i=1;i<rows.length;i++){"
+    js = js & "var txt=(rows[i].innerText||rows[i].textContent).toLowerCase();"
+    js = js & "if(txt.indexOf(q)>-1){rows[i].style.display='';n++;}"
+    js = js & "else{rows[i].style.display='none';}}"
+    js = js & "var c=document.getElementById('cnt');if(c)c.innerHTML=n+' ligne(s) affich'+String.fromCharCode(233)+'e(s)';}"
+    html = "<html><head><style>" & css & "</style><script>" & js & "</script></head><body>"
     
     If IsEmpty(resultats) Then
         html = html & "<p style='color:gray;font-style:italic'>Aucun param tre " & source & " trouv .</p>"
     Else
-        html = html & "<table><tr>"
+        html = html & "<input id='searchBox' onkeyup='filterTable()' placeholder='&#128269; Filtrer les param&egrave;tres...' style='width:320px;padding:6px;margin-bottom:8px;border:1px solid " & couleurHeader & ";border-radius:4px;font-size:12px;'>"
+        html = html & "<table id='tbl'><tr>"
         Dim k As Integer
         For k = 0 To UBound(entetes)
             html = html & "<th>" & entetes(k) & "</th>"
@@ -445,7 +472,7 @@ Private Function GenererHTMLTableau(resultats As Variant, source As String, coul
         Next i
         
         html = html & "</table>"
-        html = html & "<p style='color:gray;font-size:11px'>" & UBound(resultats, 2) & " param tre(s)</p>"
+        html = html & "<p id='cnt' style='color:gray;font-size:11px'>" & UBound(resultats, 2) & " param tre(s)</p>"
     End If
     
     html = html & "</body></html>"
@@ -527,6 +554,7 @@ Private Sub m_btnRecherche_Click()
         MsgBox Chr(201) & "quipement non trouv" & Chr(233) & " : " & newCode, vbInformation
         Exit Sub
     End If
+    Call AjouterHistorique(newCode)
     m_loadSAL = frm.loadSAL
     m_load13E = frm.load13E
     m_loadCAT = frm.loadCAT
@@ -536,6 +564,30 @@ Private Sub m_btnRecherche_Click()
     mpOnglets.Value = 0
     Call ChargerDonnees
 End Sub
+
+Private Sub btnRecherche_Click()
+    Dim frm As New FrmRecherche
+    frm.SetCode m_CodeEqt
+    frm.Show
+    If Not frm.Confirmed Then Exit Sub
+    Dim newCode As String
+    newCode = Trim(frm.codeEqt)
+    If newCode = "" Then Exit Sub
+    If Not EquipementExiste(newCode, GetCheminFichier(newCode)) Then
+        MsgBox Chr(201) & "quipement non trouv" & Chr(233) & " : " & newCode, vbInformation
+        Exit Sub
+    End If
+    Call AjouterHistorique(newCode)
+    m_loadSAL = frm.loadSAL
+    m_load13E = frm.load13E
+    m_loadCAT = frm.loadCAT
+    m_loadSYGMA = frm.loadSYGMA
+    m_CodeEqt = newCode
+    lblCode.Caption = Chr(201) & "quipement : " & m_CodeEqt
+    mpOnglets.Value = 0
+    Call ChargerDonnees
+End Sub
+
 
 Private Sub btnFermer_Click()
     Unload Me
@@ -552,6 +604,8 @@ ErrorHandler:
     Call LogError("btnExporter_Click", Err.Description, Err.Number)
     MsgBox "Erreur export. Consultez les Logs.", vbExclamation
 End Sub
+
+
 
 
 
